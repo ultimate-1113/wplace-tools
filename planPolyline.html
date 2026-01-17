@@ -82,6 +82,7 @@
           <div class="box">
             <h3>始点：[チャンク]（座標）</h3>
             <pre id="startLocal"></pre>
+            <a id="startLink" class="link" target="_blank" rel="noopener">始点をwplaceで開く</a>
           </div>
 
           <!-- 始点側 傾き -->
@@ -158,6 +159,8 @@
         const s4k = toLocal(plan2.polylineWorld[0].x, plan2.polylineWorld[0].y, 4000);
         document.getElementById('startLocal').textContent =
           `[${s4k.chunkX}, ${s4k.chunkY}] (${s4k.x}, ${s4k.y})`;
+        document.getElementById('startLink').href =
+          toWplaceURL(plan2.polylineWorld[0].x, plan2.polylineWorld[0].y, 18);
 
         // 折れ点
         const b4k = plan2.bendLocal;
