@@ -176,6 +176,40 @@ function planPolylineWorld(start, end, slopeSet = SLOPE_SET, opts = {}) {
   };
 }
 
+// ===== 実数傾き → 近似分数 [num, den] =====
+function slopeToFraction(m, set = SLOPE_SET) {
+  const a = Math.abs(m);
+
+  let best = set[0];
+  let bestErr = Math.abs(a - best);
+
+  for (const s of set) {
+    const err = Math.abs(a - s);
+    if (err < bestErr) {
+      bestErr = err;
+      best = s;
+    }
+  }
+
+  // 分母・分子を復元
+  if (best >= 1) {
+    return [Math.round(best), 1];
+  } else {
+    const den = Math.round(1 / best);
+    return [1, den];
+  }
+}
+
+function formatSlopeSigned(m, set = SLOPE_SET) {
+  if (!Number.isFinite(m)) return '—';
+
+  const sign = m < 0 ? '-' : '';
+  const [n, d] = slopeToFraction(m, set);
+
+  const core = d === 1 ? `${n}` : `${n}/${d}`;
+  return sign + core;
+}
+
 function buildDebugText(plan2) {
   const sPt = plan2.polylineWorld[0];
   const bPt = plan2.polylineWorld[1];
@@ -304,33 +338,33 @@ function wplaceUrlToRoadUrls(urlStr, outZoom = 15) {
 }
 
 /* -----------------------------------------------------
-     * map座標（標準表示）3桁固定
-     * ----------------------------------------------------- */
-    function summarizeMap(pxInfo) {
-    const c4 = toLocal(pxInfo.worldX, pxInfo.worldY, 4000);
-    const mapX = (c4.x * 13 / 4000).toFixed(3);
-    const mapY = (c4.y * 13 / 4000).toFixed(3);
-    return `(${mapX}, ${mapY})`;
-    }
+ * map座標（標準表示）3桁固定
+ * ----------------------------------------------------- */
+function summarizeMap(pxInfo) {
+const c4 = toLocal(pxInfo.worldX, pxInfo.worldY, 4000);
+const mapX = (c4.x * 13 / 4000).toFixed(3);
+const mapY = (c4.y * 13 / 4000).toFixed(3);
+return `(${mapX}, ${mapY})`;
+}
 
-    /* -----------------------------------------------------
-     * 詳細表示（世界座標整数版）
-     * ----------------------------------------------------- */
-    function summarizePointDetailed(label, pxInfo) {
-    const x = Math.round(pxInfo.worldX);
-    const y = Math.round(pxInfo.worldY);
+/* -----------------------------------------------------
+ * 詳細表示（世界座標整数版）
+ * ----------------------------------------------------- */
+function summarizePointDetailed(label, pxInfo) {
+const x = Math.round(pxInfo.worldX);
+const y = Math.round(pxInfo.worldY);
 
-    const c4 = toLocal(pxInfo.worldX, pxInfo.worldY, 4000);
-    const t1 = toLocal(pxInfo.worldX, pxInfo.worldY, 1000);
+const c4 = toLocal(pxInfo.worldX, pxInfo.worldY, 4000);
+const t1 = toLocal(pxInfo.worldX, pxInfo.worldY, 1000);
 
-    const mapX = (c4.x * 13 / 4000).toFixed(3);
-    const mapY = (c4.y * 13 / 4000).toFixed(3);
+const mapX = (c4.x * 13 / 4000).toFixed(3);
+const mapY = (c4.y * 13 / 4000).toFixed(3);
 
-    return [
-        `＜${label}＞`,
-        `world(px): (${x}, ${y})`,
-        `チャンク: [${c4.chunkX}, ${c4.chunkY}] (${c4.x}, ${c4.y})`,
-        `タイル:   [${t1.chunkX}, ${t1.chunkY}] (${t1.x}, ${t1.y})`,
-        `map座標: (${mapX}, ${mapY})`
-    ].join("\n");
-    }
+return [
+    `＜${label}＞`,
+    `world(px): (${x}, ${y})`,
+    `チャンク: [${c4.chunkX}, ${c4.chunkY}] (${c4.x}, ${c4.y})`,
+    `タイル:   [${t1.chunkX}, ${t1.chunkY}] (${t1.x}, ${t1.y})`,
+    `map座標: (${mapX}, ${mapY})`
+].join("\n");
+}

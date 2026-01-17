@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <!-- Safe Area 対応 -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="description" content="wplace 上の始点と終点のURLから、最適な折れ点と傾きを自動計算できる折れ点プランナーです。道路の折れ位置・チャンク座標・傾斜を算出し、wplaceで開けるリンクも生成します。">
-  <title>wplace 折れ点プランナー</title>
+  <meta name="description" content="wplace 上の始点と終点のURLから、最適な折れ点と傾きを自動計算できる折れ線プランナーです。道路の折れ位置・チャンク座標・傾斜を算出し、wplaceで開けるリンクも生成します。">
+  <title>wplace 折れ線プランナー</title>
   <link rel="canonical" href="https://rc-tools.wplaceoki.com/planPolyline">
   <link rel="preload" href="./style.css" as="style">
   <link rel="stylesheet" href="./style.css">
@@ -27,7 +27,7 @@
   <!-- ===== 固定ヘッダー ===== -->
   <header class="app-header">
     <div class="header-inner">
-      <h1>折れ点プランナー</h1>
+      <h1>折れ線プランナー</h1>
       <button id="menuBtn" class="menu-btn">☰</button>
     </div>
   </header>
@@ -36,7 +36,7 @@
       <ul>
         <li><a href="./">ホーム</a></li>
         <li><a href="./ConvertUrl">URL変換ツール</a></li>
-        <li><a href="./planPolyline">折れ点プランナー</a></li>
+        <li><a href="./planPolyline">折れ線プランナー</a></li>
         <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       </ul>
     </nav>
@@ -54,7 +54,7 @@
         </div>
 
         <div class="field">
-          <label for="endUrlInput">終点予定地URL</label>
+          <label for="endUrlInput">終点URL</label>
           <input id="endUrlInput" name="endUrl" type="url"
                  placeholder="https://wplace.live/?lat=...&lng=...&zoom=..." required />
         </div>
@@ -132,25 +132,6 @@
   <script>
     const form = document.getElementById('plan-form');
     const resultSec = document.getElementById('result');
-
-    // 傾きの分数表記対応
-    const FRACTIONS = [
-      [20,1],[19,1],[18,1],[17,1],[16,1],[15,1],[14,1],[13,1],[12,1],[11,1],[10,1],[9,1],[8,1],[7,1],[6,1],[5,1],[4,1],[3,1],[2,1],[1,1],
-      [1,2],[1,3],[1,4],[1,5],[1,6],[1,7],[1,8],[1,9],[1,10],[1,11],[1,12],[1,13],[1,14],[1,15],[1,16],[1,17],[1,18],[1,19],[1,20]
-    ];
-    function formatSlopeSigned(m) {
-      if (!Number.isFinite(m)) return '—';
-      const sign = m < 0 ? '-' : '';
-      const a = Math.abs(m);
-      let best = FRACTIONS[0], bestErr = Math.abs(a - best[0]/best[1]);
-      for (const [num, den] of FRACTIONS) {
-        const err = Math.abs(a - num/den);
-        if (err < bestErr) { bestErr = err; best = [num, den]; }
-      }
-      const [n, d] = best;
-      const core = d === 1 ? `${n}` : `${n}/${d}`;
-      return sign + core;
-    }
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
