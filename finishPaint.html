@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="2つの日付と残りペイント数から、完成予定日・進捗速度・人数換算を推定するツールです。">
+  <title>wplace 完成予定日計算</title>
+  <link rel="canonical" href="https://rc-tools.wplaceoki.com/finishPaint">
+  <link rel="preload" href="./style.css" as="style">
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- Cloudflare Web Analytics -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d6bd2c0d2fca4165b0b5faa0d853c779"}'></script>
+
+  <!-- Google tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FSQYW6S77K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FSQYW6S77K');
+  </script>
+</head>
+
+<body>
+
+  <!-- ===== ヘッダー ===== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>完成予定日計算</h1>
+      <button id="menuBtn" class="menu-btn">☰</button>
+    </div>
+  </header>
+
+  <!-- ===== メニュー ===== -->
+  <nav id="menuPanel" class="menu-panel">
+    <ul>
+      <li><a href="./">ホーム</a></li>
+      <li><a href="./ConvertUrl">URL変換ツール</a></li>
+      <li><a href="./planPolyline">折れ線プランナー</a></li>
+      <li><a href="./paintCalc">ペイント量計算ツール</a></li>
+      <li><a href="./finishPaint">完成予定日計算</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== メイン ===== -->
+  <main class="app-main">
+    <div class="container">
+
+      <!-- 入力フォーム -->
+      <form id="finish-form" class="card">
+        <div class="row">
+            <div class="field">
+                <label for="dt1">日付1</label>
+                <input id="dt1" type="datetime-local" required />
+            </div>
+
+            <div class="field">
+                <label for="rem1">残りペイント数1</label>
+                <input id="rem1" type="text" inputmode="numeric" placeholder="350000" required />
+            </div>
+            </div>
+
+            <div class="row">
+            <div class="field">
+                <label for="dt2">日付2</label>
+                <input id="dt2" type="datetime-local" required />
+            </div>
+
+            <div class="field">
+                <label for="rem2">残りペイント数2</label>
+                <input id="rem2" type="text" inputmode="numeric" placeholder="320000" required />
+            </div>
+        </div>
+
+        <button type="submit" class="primary">計算する</button>
+      </form>
+
+      <!-- 結果 -->
+      <section id="result" class="card" hidden>
+        <h2>結果</h2>
+
+        <div class="result-grid">
+          <div class="box">
+            <h3>完成予定日</h3>
+            <pre id="outFinish"></pre>
+          </div>
+
+          <div class="box">
+            <h3>1分当たりに進むペイント数</h3>
+            <pre id="outRate"></pre>
+          </div>
+
+          <div class="box">
+            <h3>人数換算</h3>
+            <pre id="outPeople"></pre>
+          </div>
+        </div>
+
+        <details class="details">
+          <summary>詳細</summary>
+          <pre id="debug"></pre>
+        </details>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===== フッター ===== -->
+  <footer class="app-footer">
+    <div class="container">
+      <p class="muted">© wplace沖ノ鳥島開発 道路公社技術部</p>
+    </div>
+  </footer>
+
+  <script src="./utils.js" defer></script>
+  <script>
+    const form = document.getElementById("finish-form");
+    const resultSec = document.getElementById("result");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const dt1 = document.getElementById("dt1").value;
+      const dt2 = document.getElementById("dt2").value;
+      const rem1 = readIntLike(document.getElementById("rem1").value);
+      const rem2 = readIntLike(document.getElementById("rem2").value);
+
+      try {
+        const r = calcFinishFromTwoPoints(dt1, rem1, dt2, rem2);
+
+        document.getElementById("outFinish").textContent =
+          `${formatDateTimeYMDHM(r.finishDate)}`;
+
+        document.getElementById("outRate").textContent =
+          `${r.ratePerMin.toFixed(3)} paint/min`;
+
+        document.getElementById("outPeople").textContent =
+          `${r.people.toFixed(1)} 人`;
+
+        document.getElementById("debug").textContent =
+          [
+            `日付1=${formatDateTimeYMDHM(r.t1)}  残ペイント1=${r.rem1}`,
+            `日付2=${formatDateTimeYMDHM(r.t2)}  残ペイント2=${r.rem2}`,
+            `2日付間の分数=${r.minutes}`,
+            `ペイント差=${r.deltaRemaining}`,
+            `毎分ペイント数=${r.ratePerMin}`,
+            `一人が一分当たりに塗れる量=${r.onePersonRate}`,
+            `人数=${r.people}`,
+            `完成日=${formatDateTimeYMDHM(r.finishDate)}`
+          ].join("\n");
+
+        resultSec.hidden = false;
+
+      } catch (err) {
+        alert("計算エラー: " + err.message);
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

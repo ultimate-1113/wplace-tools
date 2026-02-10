@@ -368,3 +368,122 @@ return [
     `map座標: (${mapX}, ${mapY})`
 ].join("\n");
 }
+
+/* =====================================================
+ * Finish date calculator (two points)
+ * 追加：日付1/残り1 + 日付2/残り2 → 完成予定日/速度/人数換算
+ * カレンダー入力(datetime-local)対応 + どちらが古くても自動並び替え
+ * ===================================================== */
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+/** yyyy/mm/dd hh:mm 形式で出力 */
+function formatDateTimeYMDHM(d) {
+  const Y = d.getFullYear();
+  const M = pad2(d.getMonth() + 1);
+  const D = pad2(d.getDate());
+  const H = pad2(d.getHours());
+  const Mi = pad2(d.getMinutes());
+  return `${Y}/${M}/${D} ${H}:${Mi}`;
+}
+
+/**
+ * datetime-local の value ("YYYY-MM-DDTHH:MM") を Date にする（ローカル時刻）
+ * 例: "2026-02-10T23:15"
+ */
+function parseDateTimeLocalInput(value) {
+  const s = String(value).trim();
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!m) {
+    throw new Error("日付が未入力、または形式が不正です");
+  }
+  const Y = Number(m[1]);
+  const Mo = Number(m[2]);
+  const D = Number(m[3]);
+  const H = Number(m[4]);
+  const Mi = Number(m[5]);
+
+  const dt = new Date(Y, Mo - 1, D, H, Mi, 0, 0);
+
+  // 2/31などを弾く
+  if (dt.getFullYear() !== Y || (dt.getMonth() + 1) !== Mo || dt.getDate() !== D) {
+    throw new Error("存在しない日付です");
+  }
+  return dt;
+}
+
+/** 分差（t2 - t1）を分で返す（小数） */
+function diffMinutes(t1, t2) {
+  return (t2.getTime() - t1.getTime()) / 60000;
+}
+
+/**
+ * 2点観測から完成予定日等を推定（入力順はどちらが古くてもOK）
+ *
+ * @param {string} dt1Val - datetime-local value
+ * @param {number} rem1 - 残りペイント数1（>=0）
+ * @param {string} dt2Val - datetime-local value
+ * @param {number} rem2 - 残りペイント数2（>=0）
+ */
+function calcFinishFromTwoPoints(dt1Val, rem1, dt2Val, rem2) {
+  if (!Number.isFinite(rem1) || rem1 < 0) throw new Error("残りペイント数1が不正です");
+  if (!Number.isFinite(rem2) || rem2 < 0) throw new Error("残りペイント数2が不正です");
+
+  const tA = parseDateTimeLocalInput(dt1Val);
+  const tB = parseDateTimeLocalInput(dt2Val);
+
+  // 入力順に依存しないように、時刻が古い方を t1、新しい方を t2 に揃える
+  // 残りも対応して入れ替える（＝同じ観測点のペアとして扱う）
+  let t1 = tA, t2 = tB;
+  let r1 = rem1, r2 = rem2;
+
+  if (tB.getTime() < tA.getTime()) {
+    t1 = tB; t2 = tA;
+    r1 = rem2; r2 = rem1;
+  }
+
+  const minutes = diffMinutes(t1, t2);
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    throw new Error("2つの日付が同一です（差が0分）");
+  }
+
+  // 「残り」は通常、時間が進むほど減る想定。減った分が正。
+  const deltaRemaining = r1 - r2;
+  if (deltaRemaining < 0) {
+    throw new Error("残りが増えています（後の観測の残りが多い）。入力を確認してください");
+  }
+  if (deltaRemaining === 0) {
+    throw new Error("進捗が0です（残りが変わっていません）");
+  }
+
+  const ratePerMin = deltaRemaining / minutes; // paint/min
+
+  // 完成時刻: t2 時点の残り r2 を、推定速度で消化
+  const minutesToFinish = r2 / ratePerMin;
+  const finishDate = new Date(t2.getTime() + minutesToFinish * 60000);
+
+  // 人数換算（1人 20/9 paint/min）
+  const onePersonRate = 20 / 9;
+  const people = ratePerMin / onePersonRate;
+
+  return {
+    t1, t2,
+    rem1: r1, rem2: r2,
+    minutes,
+    deltaRemaining,
+    ratePerMin,
+    onePersonRate,
+    people,
+    finishDate
+  };
+}
+
+
+function readIntLike(str) {
+  // "350,000" や "350000" を許容
+  const v = String(str).replace(/,/g, "").trim();
+  if (!/^\d+$/.test(v)) return NaN;
+  return Number(v);
+}

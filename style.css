@@ -258,3 +258,21 @@ input[type="number"]:focus {
 .menu-panel a:hover {
   color: #66ccff;
 }
+
+/* ===== 追加: text/datetime-local を既存 input[type="url"] と同じ見た目に揃える ===== */
+input[type="text"],
+input[type="datetime-local"] {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0f1430;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  font: inherit;
+}
+input[type="text"]:focus,
+input[type="datetime-local"]:focus {
+  border-color: var(--accent);
+}
