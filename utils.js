@@ -464,7 +464,7 @@ function calcFinishFromTwoPoints(dt1Val, rem1, dt2Val, rem2) {
   const minutesToFinish = r2 / ratePerMin;
   const finishDate = new Date(t2.getTime() + minutesToFinish * 60000);
 
-  // 人数換算（1人 20/9 paint/min）
+  // 人数換算（1人 100/42 paint/min）
   const onePersonRate = 100 / 42;
   const people = ratePerMin / onePersonRate;
 
