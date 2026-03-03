@@ -142,10 +142,26 @@
       const overlapWidth = parseInt(document.getElementById("overlapWidth").value, 10);
 
       try {
-        const p1 = llzToWorldPixel(...Object.values(parseWplaceURL(url1)));
-        const p2 = llzToWorldPixel(...Object.values(parseWplaceURL(url2)));
+        const { lat: lat1, lng: lng1 } = parseWplaceURL(url1);
+        const { lat: lat2, lng: lng2 } = parseWplaceURL(url2);
+        const p1 = llzToWorldPixel(lat1, lng1);
+        const p2 = llzToWorldPixel(lat2, lng2);
 
-        const dx = Math.round(Math.abs(p2.worldX - p1.worldX));
+        const rawDx = Math.abs(p2.worldX - p1.worldX);
+        let dx = rawDx;
+
+        // 日付変更線(±180°)を跨いでいる可能性が高いときだけ選択させる
+        if (rawDx > SCALE / 2) {
+          const wrapDx = SCALE - rawDx;
+          const useWrap = confirm(
+            "2地点が日付変更線(±180°)を跨いでいる可能性があります。\n" +
+            "OK: 日付変更線を跨ぐ（短い方）\n" +
+            "キャンセル: 跨がない（長い方）"
+          );
+          dx = useWrap ? wrapDx : rawDx;
+        }
+
+        dx = Math.round(dx);
         const dy = Math.round(Math.abs(p2.worldY - p1.worldY));
 
         const longAxis  = Math.max(dx, dy);
