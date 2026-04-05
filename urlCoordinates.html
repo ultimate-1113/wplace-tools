@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="wplace の URL から世界座標、チャンク座標(mod4000)、タイル座標(mod1000)へ変換できるツールです。" />
+  <title>wplace URL座標変換ツール</title>
+  <link rel="canonical" href="https://rc-tools.wplaceoki.com/urlCoordinates">
+  <link rel="preload" href="./style.css" as="style">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d6bd2c0d2fca4165b0b5faa0d853c779"}'></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FSQYW6S77K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FSQYW6S77K');
+  </script>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>URL座標変換ツール</h1>
+      <button id="menuBtn" class="menu-btn">☰</button>
+    </div>
+  </header>
+
+  <nav id="menuPanel" class="menu-panel">
+    <ul>
+      <li><a href="./">ホーム</a></li>
+      <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
+      <li><a href="./urlCoordinates">URL座標変換ツール</a></li>
+      <li><a href="./planPolyline">折れ線プランナー</a></li>
+      <li><a href="./paintCalc">ペイント量計算ツール</a></li>
+      <li><a href="./finishPaint">完成予定日計算</a></li>
+    </ul>
+  </nav>
+
+  <main class="app-main">
+    <div class="container">
+      <form id="coord-form" class="card">
+        <div class="field">
+          <label for="urlInput">URL</label>
+          <input
+            id="urlInput"
+            type="url"
+            placeholder="https://wplace.live/?lat=...&lng=...&zoom=..."
+            required
+          />
+        </div>
+
+        <p class="note">wplace URL を各座標形式に変換します。</p>
+
+        <button type="submit" class="primary">確認する</button>
+      </form>
+
+      <section id="result" class="card" hidden>
+        <h2>結果</h2>
+
+        <div class="result-grid">
+          <div class="box">
+            <h3>世界座標</h3>
+            <pre id="worldCoord"></pre>
+          </div>
+
+          <div class="box">
+            <h3>チャンク座標 (mod4000)</h3>
+            <pre id="chunkCoord"></pre>
+          </div>
+
+          <div class="box">
+            <h3>タイル座標 (mod1000)</h3>
+            <pre id="tileCoord"></pre>
+          </div>
+        </div>
+
+        <details class="details">
+          <summary>詳細</summary>
+          <pre id="debug"></pre>
+        </details>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <p class="muted">© wplace沖ノ鳥島開発 道路公社技術部</p>
+    </div>
+  </footer>
+
+  <script src="./utils.js" defer></script>
+  <script>
+    const form = document.getElementById("coord-form");
+    const resultSec = document.getElementById("result");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const url = document.getElementById("urlInput").value.trim();
+
+      try {
+        const { lat, lng } = parseWplaceURL(url);
+        const pxInfo = llzToWorldPixel(lat, lng);
+        const worldX = Math.floor(pxInfo.worldX);
+        const worldY = Math.floor(pxInfo.worldY);
+
+        document.getElementById("worldCoord").textContent =
+          `(${worldX}, ${worldY})`;
+
+        document.getElementById("chunkCoord").textContent =
+          `[${pxInfo.chunkX}, ${pxInfo.chunkY}] (${pxInfo.cLocalX}, ${pxInfo.cLocalY})`;
+
+        document.getElementById("tileCoord").textContent =
+          `[${pxInfo.tileX}, ${pxInfo.tileY}] (${pxInfo.tLocalX}, ${pxInfo.tLocalY})`;
+
+        document.getElementById("debug").textContent =
+          [
+            `URL = ${url}`,
+            `raw worldX = ${pxInfo.worldX}`,
+            `raw worldY = ${pxInfo.worldY}`,
+            summarizePointDetailed("入力URL", pxInfo)
+          ].join("\n\n");
+
+        resultSec.hidden = false;
+      } catch (err) {
+        alert("URL解析エラー: " + err.message);
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

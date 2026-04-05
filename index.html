@@ -34,7 +34,8 @@
   <nav id="menuPanel" class="menu-panel">
     <ul>
       <li><a href="./">ホーム</a></li>
-      <li><a href="./ConvertUrl">URL変換ツール</a></li>
+      <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
+      <li><a href="./urlCoordinates">URL座標変換ツール</a></li>
       <li><a href="./planPolyline">折れ線プランナー</a></li>
       <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       <li><a href="./finishPaint">完成予定日計算</a></li>
@@ -55,11 +56,21 @@
         <!-- ===== ツール一覧 ===== -->
         <div class="tool-list" style="margin-top: 20px;">
 
-          <!-- URL変換ツール -->
+          <!-- 道路地図URL変換ツール -->
           <div class="tool-item" style="margin-bottom: 30px;">
-            <h3>道路地図 URL 変換ツール</h3>
+            <h3>道路地図URL変換ツール</h3>
             <p>wplace道路地図のURLと現地のURLを相互に変換できます。</p>
             <a href="./ConvertUrl">
+              <button class="primary" style="width: 100%; margin-top: 10px;">
+                開く
+              </button>
+            </a>
+          </div>
+
+          <div class="tool-item" style="margin-bottom: 30px;">
+            <h3>URL座標変換ツール</h3>
+            <p>wplace の URL の緯度・経度から世界座標、チャンク座標、タイル座標に変換できます。</p>
+            <a href="./urlCoordinates">
               <button class="primary" style="width: 100%; margin-top: 10px;">
                 開く
               </button>
