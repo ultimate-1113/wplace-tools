@@ -4,16 +4,18 @@
 
 ## D1 とプレビュー
 
-Pages の Preview と Production に別々の D1 データベースを用意し、それぞれ `DB` という名前でバインドします。各 DB に `migrations/0001_templates.sql` を適用してからデプロイしてください。ローカルでは以下を使用します。
+Pages の Preview と Production に別々の D1 データベースを用意し、それぞれ `DB` という名前でバインドします。各 DB に未適用のマイグレーションを適用してからデプロイしてください。新しいローカル環境では以下を使用します。
 
 ```sh
-npx wrangler d1 execute DB --config wrangler.local.jsonc --local --file migrations/0001_templates.sql
-npx wrangler pages dev dist --d1 DB=local-DB --compatibility-flags nodejs_compat --compatibility-date 2026-04-01
+npx wrangler d1 migrations apply DB --config wrangler.local.jsonc --local
+npx wrangler pages dev dist --d1 DB=local-DB
 ```
 
-Pages の本番とプレビューには互換フラグ `nodejs_compat` を設定します。共有ファイルは UTF-8 で1,500,000バイトまでです。一般投稿はリンク限定で、公式に掲載する作品は運営が対応する行の official を1に設定します。
+Pages の本番とプレビューには互換フラグ `nodejs_compat` を設定します。.wplace は UTF-8 で1,500,000バイトまでです。サイトの「アップロードして一覧に公開」または MCP の `upload_template` で一般投稿できます。「共有リンクを発行」と `share_template` はリンク限定です。公式マークは運営が D1 の official を1に設定した作品にだけ付きます。
 
 ## MCP
+
+共有 ID は公開区分と .wplace の UTF-8 本文を SHA-256 でハッシュし、先頭96ビットを Base64URL で表した16文字です。同じ公開区分・同じ本文ならサイトと MCP で同じ URL になります。空白や設置地点を変えたファイルは別 ID です。
 
 道路作図では中心線の半径・緩和区間長を世界ピクセルで指定します。円弧は真北0度から時計回り、クロソイドの3点は進入・交点・退出の順です。1枚の出力は最大4,194,304画素で、世界座標の外に出る図案は入力エラーになります。縁幅は道幅に含まれます。
 

@@ -104,7 +104,16 @@ try {
   const link = await page.getAttribute("#shared", "href");
   await page.goto(new URL(link, origin).href);
   await page.locator("#preview").waitFor();
-  assert.equal(await page.locator("#catalog a").count(), 0);
+  const privateId = new URL(link, origin).searchParams.get("id");
+  assert.equal(await page.locator(`#catalog a[href="?id=${privateId}"]`).count(), 0);
+  assert.ok(await page.locator("#publish").isDisabled());
+  assert.equal(await page.locator("#output #publish").count(), 0);
+  const bytes = await (await fetch(origin + "/api/templates/" + privateId)).arrayBuffer();
+  await page.setInputFiles("#upload", { name: "road.wplace", mimeType: "application/json", buffer: Buffer.from(bytes) });
+  await page.click("#publish");
+  await page.waitForSelector("#published[href]");
+  const publicId = new URL(await page.getAttribute("#published", "href"), origin).searchParams.get("id");
+  await page.locator(`#catalog a[href="?id=${publicId}"]`).waitFor();
   assert.deepEqual(errors, []);
   console.log(
     "Eight routes, light/mobile and dark/desktop, menu, coordinates, polyline, native PNG, D1 share and retrieval passed.",

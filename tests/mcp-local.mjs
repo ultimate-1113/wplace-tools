@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { LIMIT } from "../template.js";
-const host = "http://127.0.0.1:8788";
+const host = process.env.TEST_ORIGIN || "http://127.0.0.1:8788";
 async function rpc(method, params) {
   const r = await fetch(host + "/mcp", {
     method: "POST",
@@ -59,12 +59,27 @@ assert.equal(png.contents[0].mimeType, "image/png");
 const source = await (await fetch(road.download)).text();
 const args = { requestKey: crypto.randomUUID(), source };
 const first = await call("share_template", args);
+assert.match(first.id, /^[A-Za-z0-9_-]{16}$/);
+assert.deepEqual(await call("share_template", { ...args, requestKey: crypto.randomUUID() }), first);
 assert.deepEqual(await call("share_template", args), first);
 assert.equal((await call("get_template", { id: first.id })).source, source);
 assert.ok(
   !(await call("list_templates", {})).templates.some((t) => t.id === first.id),
 );
 const padded = source + " ".repeat(LIMIT - Buffer.byteLength(source));
+const published = await call("upload_template", { source, requestKey: crypto.randomUUID() });
+assert.notEqual(published.id, first.id);
+const posted = await fetch(host + "/api/templates?listed=1", {
+  method: "POST", body: source, headers: { "Idempotency-Key": crypto.randomUUID() },
+});
+assert.equal((await posted.json()).id, published.id);
+const entry = (await call("list_templates", {})).templates.find(t => t.id === published.id);
+assert.equal(entry.official, false);
+const official = (await call("list_templates", {})).templates.find(t => t.official && t.name === "ラウンドアバウト");
+assert.equal(official.id, "irJkh26b4BwCLtlQ");
+assert.equal((await fetch(host + "/api/templates/official-roundabout")).status, 404);
+const saved = await call("get_template", { id: official.id });
+assert.equal((await call("upload_template", { source: saved.source, requestKey: crypto.randomUUID() })).id, official.id);
 for (const [body, status] of [
   [padded, 200],
   [padded + " ", 413],

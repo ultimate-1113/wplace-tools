@@ -244,3 +244,11 @@ pre {
   flex-wrap: wrap;
   align-items: center;
 }
+.official-badge {
+  display: inline-block;
+  margin-inline-start: .5em;
+  padding: 0 .45em;
+  border: 1px solid currentColor;
+  border-radius: .35em;
+  font-size: .75em;
+}

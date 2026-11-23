@@ -1,0 +1,1 @@
+ALTER TABLE templates ADD COLUMN listed INTEGER NOT NULL DEFAULT 0 CHECK (listed IN (0,1));

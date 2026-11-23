@@ -39,6 +39,7 @@ export async function onRequest({ request, params, env }) {
       env.DB,
       source + decoder.decode(),
       request.headers.get("Idempotency-Key"),
+      new URL(request.url).searchParams.get("listed") === "1",
     );
     return Response.json({ id: saved, url: "/junctionTemplates?id=" + saved });
   } catch (e) {

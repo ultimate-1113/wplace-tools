@@ -65,18 +65,26 @@
     <main class="app-main">
       <div class="container">
         <section class="card">
-          <h2>公式テンプレート</h2>
+          <h2>テンプレート一覧</h2>
           <div id="catalog"></div>
         </section>
         <section class="card">
           <div class="field">
-            <label for="upload">.wplace ファイル（1.5 MBまで）</label
+            <label for="upload">共有する .wplace ファイル（1.5 MBまで）</label
             ><input id="upload" name="upload" type="file" accept=".wplace" />
+          </div>
+          <div class="actions">
+            <button id="publish" class="primary" type="button" disabled>アップロードして一覧に公開</button>
+            <a id="published"></a>
           </div>
         </section>
         <section id="output" class="card" hidden>
           <h2>プレビュー</h2>
           <img id="preview" class="preview" alt="テンプレート" />
+          <div class="field">
+            <label for="placement">設置地点（中心の wplace URL）</label>
+            <input id="placement" type="url" placeholder="https://wplace.live/?lat=…&amp;lng=…" />
+          </div>
           <div class="actions">
             <a id="download" download="template.wplace"
               >.wplace をダウンロード</a

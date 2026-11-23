@@ -18,18 +18,22 @@ export function show(text, template = parseTemplate(text)) {
   el("shared").textContent = "";
   message("");
 }
-el("share").onclick = async () => {
-  const current = key;
-  try {
-    const r = await fetch("/api/templates", {
+export async function submitTemplate(source, current, listed = false) {
+    const r = await fetch(listed ? "/api/templates?listed=1" : "/api/templates", {
       method: "POST",
       headers: { "Idempotency-Key": current },
       body: source,
     });
     const data = await r.json();
     if (!r.ok) throw Error(data.error);
+    return data.url;
+}
+el("share").onclick = async () => {
+  const current = key;
+  try {
+    const url = await submitTemplate(source, current);
     if (current !== key) return;
-    el("shared").href = data.url;
+    el("shared").href = url;
     el("shared").textContent = el("shared").href;
   } catch (e) {
     message(e.message);

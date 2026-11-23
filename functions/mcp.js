@@ -202,7 +202,7 @@ export function server(db, origin) {
       };
     },
   );
-  tool("list_templates", "公式テンプレート", {}, async () => ({
+  tool("list_templates", "公開テンプレート一覧（official は公式マーク）", {}, async () => ({
     templates: await catalog(db),
   }));
   m.registerResource(
@@ -227,12 +227,22 @@ export function server(db, origin) {
   tool(
     "get_template",
     "テンプレート取得",
-    { id: z.string().uuid() },
+    { id: z.string().regex(/^[a-zA-Z0-9_-]{1,128}$/) },
     async (p) => ({
       source: await get(db, p.id),
       download: origin + "/api/templates/" + p.id,
       resources: ["png", "file"].map((f) => "road://shared/" + p.id + "/" + f),
     }),
+  );
+  tool(
+    "upload_template",
+    ".wplace を一覧に公開（UTF-8 で1,500,000バイトまで）",
+    { source: z.string(), requestKey: z.string().min(16).max(128) },
+    async (p) => {
+      const id = await share(db, p.source, p.requestKey, true);
+      return { id, url: origin + "/junctionTemplates?id=" + id };
+    },
+    false,
   );
   tool(
     "share_template",
