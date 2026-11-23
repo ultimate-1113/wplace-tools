@@ -28,11 +28,11 @@
   <header class="app-header">
     <div class="header-inner">
       <h1>折れ線プランナー</h1>
-      <button id="menuBtn" class="menu-btn">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー" aria-controls="menuPanel" aria-expanded="false">☰</button>
     </div>
   </header>
   
-    <nav id="menuPanel" class="menu-panel">
+    <nav id="menuPanel" class="menu-panel" hidden>
       <ul>
         <li><a href="./">ホーム</a></li>
         <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
@@ -40,6 +40,8 @@
         <li><a href="./planPolyline">折れ線プランナー</a></li>
         <li><a href="./paintCalc">ペイント量計算ツール</a></li>
         <li><a href="./finishPaint">完成予定日計算</a></li>
+        <li><a href="./roadDesign">道路作図</a></li>
+        <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
       </ul>
     </nav>
 
@@ -131,73 +133,6 @@
   </footer>
 
   <!-- ===== スクリプト ===== -->
-  <script src="./utils.js" defer></script>
-  <script>
-    const form = document.getElementById('plan-form');
-    const resultSec = document.getElementById('result');
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const startUrl = document.getElementById('startUrlInput').value.trim();
-      const endUrl   = document.getElementById('endUrlInput').value.trim();
-      const order    = document.getElementById('order').value;
-
-      try {
-        const { lat: sLat, lng: sLng } = parseWplaceURL(startUrl);
-        const { lat: eLat, lng: eLng } = parseWplaceURL(endUrl);
-
-        const p1 = llzToWorldPixel(sLat, sLng);
-        const p2 = llzToWorldPixel(eLat, eLng);
-
-        const plan2 = planPolylineWorld(
-          { x: p1.worldX, y: p1.worldY },
-          { x: p2.worldX, y: p2.worldY },
-          SLOPE_SET,
-          { order, roundToInt: true }
-        );
-
-        // 始点
-        const s4k = toLocal(plan2.polylineWorld[0].x, plan2.polylineWorld[0].y, 4000);
-        document.getElementById('startLocal').textContent =
-          `[${s4k.chunkX}, ${s4k.chunkY}] (${s4k.x}, ${s4k.y})`;
-        document.getElementById('startLink').href =
-          toWplaceURL(plan2.polylineWorld[0].x, plan2.polylineWorld[0].y, 18);
-
-        // 折れ点
-        const b4k = plan2.bendLocal;
-        document.getElementById('bendLocal').textContent =
-          `[${b4k.chunkX}, ${b4k.chunkY}] (${b4k.x}, ${b4k.y})`;
-        document.getElementById('bendLink').href =
-          toWplaceURL(plan2.bend.x, plan2.bend.y, 18);
-
-        // 終点
-        const e4k = toLocal(plan2.plannedEnd.x, plan2.plannedEnd.y, 4000);
-        document.getElementById('endLocal').textContent =
-          `[${e4k.chunkX}, ${e4k.chunkY}] (${e4k.x}, ${e4k.y})`;
-        document.getElementById('endLink').href =
-          toWplaceURL(plan2.plannedEnd.x, plan2.plannedEnd.y, 18);
-
-        // 傾き
-        const sPt = plan2.polylineWorld[0];
-        const bPt = plan2.polylineWorld[1];
-        const ePt = plan2.polylineWorld[2];
-        const slopeStart = (bPt.x === sPt.x) ? Infinity : (bPt.y - sPt.y) / (bPt.x - sPt.x);
-        const slopeEnd   = (ePt.x === bPt.x) ? Infinity : (ePt.y - bPt.y) / (ePt.x - bPt.x);
-
-        document.getElementById('slopeStart').textContent = formatSlopeSigned(slopeStart);
-        document.getElementById('slopeEnd').textContent   = formatSlopeSigned(slopeEnd);
-
-        // ---- デバッグ出力 ----
-        const debugText = buildDebugText(plan2);
-        document.getElementById('debug').textContent = debugText;
-        resultSec.hidden = false;
-
-      } catch (err) {
-        alert('URLの解析または計算でエラー: ' + err.message);
-        console.error(err);
-      }
-    });
-  </script>
+  <script type="module" src="./planPolyline.js"></script>
 </body>
 </html>

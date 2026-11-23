@@ -126,7 +126,7 @@ function planPolylineWorld(start, end, slopeSet = SLOPE_SET, opts = {}) {
       a: null, b: null, Na: 0, Nb: 0, bend: null,
       plannedEnd: e,
       polylineWorld: [s, e],
-      polylineLocal: [toLocal(s.x, s.y), toLocal(e.x, e.y)],
+      polylineLocal: [toLocal(s.x, s.y, MOD_CHUNK), toLocal(e.x, e.y, MOD_CHUNK)],
       errorPx: { dx: e.x - end.x, dy: e.y - end.y },
     };
   }
@@ -210,10 +210,16 @@ function formatSlopeSigned(m, set = SLOPE_SET) {
   return sign + core;
 }
 
+export function polylineSlopes(plan) {
+  const slope = (a, b) => !a || !b || a.x === b.x
+    ? null : formatSlopeSigned((b.y - a.y) / (b.x - a.x));
+  return { start: slope(plan.polylineWorld[0], plan.bend), end: slope(plan.bend, plan.plannedEnd) };
+}
+
 function buildDebugText(plan2) {
   const sPt = plan2.polylineWorld[0];
-  const bPt = plan2.polylineWorld[1];
-  const ePt = plan2.polylineWorld[2];
+  const bPt = plan2.bend;
+  const ePt = plan2.plannedEnd;
 
   const c4 = (pt) => toLocal(pt.x, pt.y, 4000);
   const t1 = (pt) => toLocal(pt.x, pt.y, 1000);
@@ -237,7 +243,7 @@ function buildDebugText(plan2) {
     '',
     fmt('始点', sPt),
     '',
-    fmt('折れ点', bPt),
+    bPt ? fmt('折れ点', bPt) : '＜折れ点＞\n—',
     '',
     fmt('終点', ePt),
     '',
@@ -283,22 +289,6 @@ function isWithinRoadMapBounds(urlStr) {
   const withinLng = lng >= MAP_TOP_LEFT.lng && lng <= MAP_BOTTOM_RIGHT.lng;
   return withinLat && withinLng;
 }
-
-const menuBtn = document.getElementById('menuBtn');
-const menuPanel = document.getElementById('menuPanel');
-
-menuBtn.addEventListener('click', () => {
-  menuPanel.classList.toggle('open');
-  menuBtn.classList.toggle('active');
-});
-
-// リンククリックで閉じる
-document.querySelectorAll('#menuPanel a').forEach(link => {
-  link.addEventListener('click', () => {
-    menuPanel.classList.remove('open');
-    menuBtn.classList.remove('active');
-  });
-});
 
 // ===== wplace世界URL → 道路地図URL（逆変換） =====
 function wplaceUrlToRoadUrls(urlStr, outZoom = 15) {
@@ -431,8 +421,8 @@ function calcFinishFromTwoPoints(dt1Val, rem1, dt2Val, rem2) {
   if (!Number.isFinite(rem1) || rem1 < 0) throw new Error("残りペイント数1が不正です");
   if (!Number.isFinite(rem2) || rem2 < 0) throw new Error("残りペイント数2が不正です");
 
-  const tA = parseDateTimeLocalInput(dt1Val);
-  const tB = parseDateTimeLocalInput(dt2Val);
+  const tA = dt1Val instanceof Date ? dt1Val : parseDateTimeLocalInput(dt1Val);
+  const tB = dt2Val instanceof Date ? dt2Val : parseDateTimeLocalInput(dt2Val);
 
   // 入力順に依存しないように、時刻が古い方を t1、新しい方を t2 に揃える
   // 残りも対応して入れ替える（＝同じ観測点のペアとして扱う）
@@ -487,3 +477,12 @@ function readIntLike(str) {
   if (!/^\d+$/.test(v)) return NaN;
   return Number(v);
 }
+function paintAmount(p1,p2,width,overlap,wrap) {
+  const raw = Math.abs(p2.worldX-p1.worldX);
+  if(raw>SCALE/2 && typeof wrap !== 'boolean') throw new Error('日付変更線を跨ぐか指定してください');
+  const dx=Math.round(raw>SCALE/2 && wrap ? SCALE-raw : raw);
+  const dy=Math.round(Math.abs(p2.worldY-p1.worldY));
+  return {dx,dy,requiredPx:(Math.max(dx,dy)-1)*width+Math.min(dx,dy)*overlap};
+}
+
+export { MOD_CHUNK, MOD_TILE, ZOOM_BASE, SCALE, MAP_CHUNK, MAP_SCALE, ORIGIN, MAP_TOP_LEFT, MAP_BOTTOM_RIGHT, WEST_INDIA_X, EAST_INDIA_X, parseWplaceURL, worldToLatLng, llzToWorldPixel, toLocal, toWplaceURL, SLOPE_SET, chooseSlopes, planPolylineWorld, slopeToFraction, formatSlopeSigned, buildDebugText, roadUrlToWplaceUrl, isWithinRoadMapBounds, wplaceUrlToRoadUrls, summarizeMap, summarizePointDetailed, pad2, formatDateTimeYMDHM, parseDateTimeLocalInput, diffMinutes, calcFinishFromTwoPoints, readIntLike, paintAmount };

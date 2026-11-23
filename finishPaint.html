@@ -28,12 +28,12 @@
   <header class="app-header">
     <div class="header-inner">
       <h1>完成予定日計算</h1>
-      <button id="menuBtn" class="menu-btn">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー" aria-controls="menuPanel" aria-expanded="false">☰</button>
     </div>
   </header>
 
   <!-- ===== メニュー ===== -->
-  <nav id="menuPanel" class="menu-panel">
+  <nav id="menuPanel" class="menu-panel" hidden>
     <ul>
       <li><a href="./">ホーム</a></li>
       <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
@@ -41,6 +41,8 @@
       <li><a href="./planPolyline">折れ線プランナー</a></li>
       <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       <li><a href="./finishPaint">完成予定日計算</a></li>
+      <li><a href="./roadDesign">道路作図</a></li>
+      <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
     </ul>
   </nav>
 
@@ -114,50 +116,6 @@
     </div>
   </footer>
 
-  <script src="./utils.js" defer></script>
-  <script>
-    const form = document.getElementById("finish-form");
-    const resultSec = document.getElementById("result");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const dt1 = document.getElementById("dt1").value;
-      const dt2 = document.getElementById("dt2").value;
-      const rem1 = readIntLike(document.getElementById("rem1").value);
-      const rem2 = readIntLike(document.getElementById("rem2").value);
-
-      try {
-        const r = calcFinishFromTwoPoints(dt1, rem1, dt2, rem2);
-
-        document.getElementById("outFinish").textContent =
-          `${formatDateTimeYMDHM(r.finishDate)}`;
-
-        document.getElementById("outRate").textContent =
-          `${r.ratePerMin.toFixed(3)} paint/min`;
-
-        document.getElementById("outPeople").textContent =
-          `${r.people.toFixed(1)} 人`;
-
-        document.getElementById("debug").textContent =
-          [
-            `日付1=${formatDateTimeYMDHM(r.t1)}  残ペイント1=${r.rem1}`,
-            `日付2=${formatDateTimeYMDHM(r.t2)}  残ペイント2=${r.rem2}`,
-            `2日付間の分数=${r.minutes}`,
-            `ペイント差=${r.deltaRemaining}`,
-            `毎分ペイント数=${r.ratePerMin}`,
-            `一人が一分当たりに塗れる量=${r.onePersonRate}`,
-            `人数=${r.people}`,
-            `完成日=${formatDateTimeYMDHM(r.finishDate)}`
-          ].join("\n");
-
-        resultSec.hidden = false;
-
-      } catch (err) {
-        alert("計算エラー: " + err.message);
-        console.error(err);
-      }
-    });
-  </script>
+  <script type="module" src="./finishPaint.js"></script>
 </body>
 </html>

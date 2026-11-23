@@ -26,12 +26,12 @@
   <header class="app-header">
     <div class="header-inner">
       <h1>wplaceツール</h1>
-      <button id="menuBtn" class="menu-btn">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー" aria-controls="menuPanel" aria-expanded="false">☰</button>
     </div>
   </header>
 
   <!-- ===== メニュー ===== -->
-  <nav id="menuPanel" class="menu-panel">
+  <nav id="menuPanel" class="menu-panel" hidden>
     <ul>
       <li><a href="./">ホーム</a></li>
       <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
@@ -39,6 +39,8 @@
       <li><a href="./planPolyline">折れ線プランナー</a></li>
       <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       <li><a href="./finishPaint">完成予定日計算</a></li>
+      <li><a href="./roadDesign">道路作図</a></li>
+      <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
     </ul>
   </nav>
 
@@ -46,7 +48,7 @@
   <main class="app-main">
     <div class="container">
 
-      <section class="card" style="padding: 20px;">
+      <section class="card">
         <h2>RC Tools へようこそ</h2>
         <p>
           RC Tools は wplace の道路敷設・地図反映作業を効率化するためのツール集です。<br>
@@ -54,61 +56,53 @@
         </p>
 
         <!-- ===== ツール一覧 ===== -->
-        <div class="tool-list" style="margin-top: 20px;">
+        <div class="tool-list">
 
           <!-- 道路地図URL変換ツール -->
-          <div class="tool-item" style="margin-bottom: 30px;">
+          <div class="tool-item">
             <h3>道路地図URL変換ツール</h3>
             <p>wplace道路地図のURLと現地のURLを相互に変換できます。</p>
             <a href="./ConvertUrl">
-              <button class="primary" style="width: 100%; margin-top: 10px;">
-                開く
-              </button>
+              開く
             </a>
           </div>
 
-          <div class="tool-item" style="margin-bottom: 30px;">
+          <div class="tool-item">
             <h3>URL座標変換ツール</h3>
             <p>wplace の URL の緯度・経度から世界座標、チャンク座標、タイル座標に変換できます。</p>
             <a href="./urlCoordinates">
-              <button class="primary" style="width: 100%; margin-top: 10px;">
-                開く
-              </button>
+              開く
             </a>
           </div>
 
           <!-- 折れ線プランナー -->
-          <div class="tool-item"style="margin-bottom: 30px;">
+          <div class="tool-item">
             <h3>折れ線プランナー</h3>
             <p>始点と終点の座標から道路の折れ点を計算し、折れ線の作成が容易にできます。</p>
             <a href="./planPolyline">
-              <button class="primary" style="width: 100%; margin-top: 10px;">
-                開く
-              </button>
+              開く
             </a>
           </div>
 
           <!-- ペイント量計算ツール -->
-          <div class="tool-item"style="margin-bottom: 30px;">
+          <div class="tool-item">
             <h3>ペイント量計算ツール</h3>
             <p>2地点のURLから、xy方向の距離と必要なペイント量(px)を計算します。(傾きが1を跨ぐ道路には使用できません)</p>
             <a href="./paintCalc">
-              <button class="primary" style="width: 100%; margin-top: 10px;">
-                開く
-              </button>
+              開く
             </a>
           </div>
 
           <!-- 完成予定日計算 -->
-          <div class="tool-item" style="margin-bottom: 30px;">
+          <div class="tool-item">
             <h3>完成予定日計算</h3>
             <p>2つの日付と残りペイント数から、完成予定日・進捗速度・人数換算を推定します。</p>
             <a href="./finishPaint">
-              <button class="primary" style="width: 100%; margin-top: 10px;">
-                開く
-              </button>
+              開く
             </a>
           </div>
+        <div class="tool-item"><h3>道路作図</h3><a href="./roadDesign">開く</a></div>
+          <div class="tool-item"><h3>ジャンクションテンプレート</h3><a href="./junctionTemplates">開く</a></div>
         </div>
       </section>
 
@@ -123,6 +117,6 @@
   </footer>
 
   <!-- ===== スクリプト ===== -->
-  <script src="./utils.js" defer></script>
+  <script type="module" src="./index.js"></script>
 </body>
 </html>

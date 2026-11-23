@@ -22,11 +22,11 @@
   <header class="app-header">
     <div class="header-inner">
       <h1>URL座標変換ツール</h1>
-      <button id="menuBtn" class="menu-btn">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー" aria-controls="menuPanel" aria-expanded="false">☰</button>
     </div>
   </header>
 
-  <nav id="menuPanel" class="menu-panel">
+  <nav id="menuPanel" class="menu-panel" hidden>
     <ul>
       <li><a href="./">ホーム</a></li>
       <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
@@ -34,6 +34,8 @@
       <li><a href="./planPolyline">折れ線プランナー</a></li>
       <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       <li><a href="./finishPaint">完成予定日計算</a></li>
+      <li><a href="./roadDesign">道路作図</a></li>
+      <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
     </ul>
   </nav>
 
@@ -89,45 +91,6 @@
     </div>
   </footer>
 
-  <script src="./utils.js" defer></script>
-  <script>
-    const form = document.getElementById("coord-form");
-    const resultSec = document.getElementById("result");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const url = document.getElementById("urlInput").value.trim();
-
-      try {
-        const { lat, lng } = parseWplaceURL(url);
-        const pxInfo = llzToWorldPixel(lat, lng);
-        const worldX = Math.floor(pxInfo.worldX);
-        const worldY = Math.floor(pxInfo.worldY);
-
-        document.getElementById("worldCoord").textContent =
-          `(${worldX}, ${worldY})`;
-
-        document.getElementById("chunkCoord").textContent =
-          `[${pxInfo.chunkX}, ${pxInfo.chunkY}] (${pxInfo.cLocalX}, ${pxInfo.cLocalY})`;
-
-        document.getElementById("tileCoord").textContent =
-          `[${pxInfo.tileX}, ${pxInfo.tileY}] (${pxInfo.tLocalX}, ${pxInfo.tLocalY})`;
-
-        document.getElementById("debug").textContent =
-          [
-            `URL = ${url}`,
-            `raw worldX = ${pxInfo.worldX}`,
-            `raw worldY = ${pxInfo.worldY}`,
-            summarizePointDetailed("入力URL", pxInfo)
-          ].join("\n\n");
-
-        resultSec.hidden = false;
-      } catch (err) {
-        alert("URL解析エラー: " + err.message);
-        console.error(err);
-      }
-    });
-  </script>
+  <script type="module" src="./urlCoordinates.js"></script>
 </body>
 </html>

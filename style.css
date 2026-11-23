@@ -1,278 +1,246 @@
 :root {
-  /* colors */
-  --bg: #0b1020;
-  --card: #11172b;
-  --muted: #a4b0d0;
-  --text: #e8eeff;
-  --accent: #5aa0ff;
-  --accent-2: #42d6a4;
-  --border: #223056;
-
-  /* layout */
-  --header-h: 56px;   /* ヘッダー高さ（48〜64で微調整可） */
-  --footer-h: 48px;   /* フッター高さ（実効は48px + 安全余白） */
+  color-scheme: light;
+  --bg: #f7f6f0;
+  --surface: #fff;
+  --ink: #263732;
+  --muted: #53665e;
+  --line: #75857e;
+  --soft: #d4dcd5;
+  --accent: #276a5d;
+  --on: #fff;
+  --tint: #edf3ee;
 }
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  background: radial-gradient(1200px 600px at 20% -10%, #162140, #0a0f20 60%);
-  color: var(--text);
-  font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
-  min-height: 100%;
-}
-
-/* === 時間割方式：本文がフッターに隠れないよう body に下余白を持たせる === */
-body {
-  /* 基本はフッター高さ + α、Safe Area を加味（iOS） */
-  padding-bottom: calc(var(--footer-h) + max(env(safe-area-inset-bottom), 0px) + 24px);
-  overflow-x: hidden;
-}
-
-/* タッチ端末（iOS/Android）ではさらに余白を増やして安全側に */
-@media (hover: none) and (pointer: coarse) {
-  body {
-    padding-bottom: calc(var(--footer-h) + max(env(safe-area-inset-bottom), 0px) + 40px);
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #303634;
+    --surface: #3b4341;
+    --ink: #f3f2eb;
+    --muted: #cfd3cb;
+    --line: #94a399;
+    --soft: #596560;
+    --accent: #a4d9c5;
+    --on: #263732;
+    --tint: #343c39;
   }
 }
-
-/* ===== 固定ヘッダー ===== */
-.app-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  z-index: 100;
-  background: linear-gradient(180deg, rgba(11,16,32,.95), rgba(11,16,32,.6));
-  border-bottom: 1px solid var(--border);
-  -webkit-backdrop-filter: saturate(150%) blur(6px);
-  backdrop-filter: saturate(150%) blur(6px);
+* {
   box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font:
+    16px/1.55 system-ui,
+    "Yu Gothic",
+    sans-serif;
+}
+[hidden] {
+  display: none !important;
+}
+.container,
+.header-inner {
+  width: min(100%, 980px);
+  margin: auto;
+  padding: 0 1rem;
+}
+.app-header {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--soft);
+  z-index: 3;
 }
 .header-inner {
-  height: 100%;
   display: flex;
-  align-items: center;        /* 縦の真ん中 */
-  justify-content: flex-start;
-  padding: 0 20px;            /* 上下0・左右のみ */
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
 }
-
-/* ヘッダー分の余白を main に確保（被り防止） */
-.app-main { padding-top: calc(var(--header-h) + 12px); }
-
-/* ===== 固定フッター（時間割方式 + 透過 + SafeArea） ===== */
+h1,
+h2,
+h3,
+p {
+  margin: 0 0 0.65rem;
+}
+h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+h2 {
+  font-size: 1.17rem;
+}
+h3 {
+  font-size: 1rem;
+}
+.app-main {
+  flex: 1;
+  padding: 1rem 0;
+}
 .app-footer {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: var(--footer-h);
-  background: rgba(11, 16, 32, 0.85);
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 90;
-  -webkit-backdrop-filter: saturate(150%) blur(6px);
-  backdrop-filter: saturate(150%) blur(6px);
-}
-
-/* フッター内テキスト */
-.app-footer .container {
-  max-width: 980px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;    /* 水平だけ。縦は footer の高さで管理 */
-  box-sizing: border-box;
-}
-.app-footer .muted {
-  color: var(--muted);
-  font-size: 0.85rem;
-  margin: 0;
+  padding: 1rem;
+  background: var(--surface);
   text-align: center;
-  line-height: 1.4;
+  font-size: 0.85rem;
 }
-
-/* ===== コンテンツレイアウト ===== */
-.container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 0 20px;   /* 下は body の padding-bottom を使う */
+.app-footer p {
+  margin: 0;
 }
-
-h1 { font-size: 1.3rem; margin: 0; line-height: 1; }
-h2 { font-size: 1.2rem; margin: 0 0 12px; }
-h3 { font-size: 1rem;  margin: 0 0 8px; }
-
+.card,
+.box,
+.tool-item,
+.menu-panel {
+  background: var(--surface);
+  border: 1px solid var(--soft);
+  border-radius: 12px;
+  padding: 1rem;
+}
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  margin: 12px 0 16px;
+  margin-bottom: 1rem;
 }
-
-.field { margin-bottom: 12px; }
-label { display: block; font-size: .9rem; color: var(--muted); margin-bottom: 6px; }
-
-input[type="url"], select {
-  width: 100%;
-  box-sizing: border-box;          /* ← 幅のずれを防ぐ最重要行 */
-  background: #0f1430;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;              /* ← 右の余白は矢印ぶん確保されるのでOK */
-  outline: none;
-  font: inherit;
+.box,
+.tool-item {
+  min-width: 0;
 }
-input[type="url"]:focus, select:focus { border-color: var(--accent); }
-
-button.primary {
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  color: #0b1020;
-  border: 0;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-weight: 700;
-  cursor: pointer;
+.tool-item {
+  display: flex;
+  flex-direction: column;
 }
-button.primary:hover { filter: brightness(1.05); }
-
-.note { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
-
-/* 結果グリッド：モバイルで縦積み、広い画面で2→3カラム */
-.result-grid {
+.tool-item a {
+  margin-top: auto;
+}
+.tool-list,
+.result-grid,
+.row,
+.design-grid {
   display: grid;
-  gap: 12px;
-  grid-template-columns: 1fr;
+  gap: 0.85rem;
 }
-@media (min-width: 600px) {
-  .result-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.tool-list {
+  margin-top: 1rem;
 }
-@media (min-width: 900px) {
-  .result-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+@media (min-width: 700px) {
+  .tool-list,
+  .row,
+  .design-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .result-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
 }
-
-.box {
-  background: #0e1534;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
+.field {
+  margin-bottom: 0.85rem;
 }
-
-pre {
-  margin: 0;
-  padding: 10px;
-  background: #0a102a;
-  border: 1px dashed #2a3b6f;
-  border-radius: 10px;
-  white-space: pre-wrap;
-  word-break: break-all;
+label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--muted);
 }
-
-/* アンカー／details 展開でもフッターに食われないように */
-.card, .details, section, [id] { scroll-margin-bottom: calc(var(--footer-h) + 24px); }
-
-.row  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row > .field:only-child { grid-column: 1 / -1; }
-@media (max-width: 700px) { .row { grid-template-columns: 1fr; } }
-
-.link { display: inline-block; margin-top: 8px; color: var(--accent); word-break: break-all; }
-.muted { color: var(--muted); text-align: center; margin: 0; }
-
-.details summary { cursor: pointer; }
-
-/* ===== Zoom入力欄の外観調整 ===== */
-input[type="number"] {
-  background-color: var(--app-bg, #0b0f1a); /* ページの背景色と統一 */
-  color: #fff;
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 4px 6px;
-  width: 80px;
+input,
+select,
+button,
+.tool-item a {
+  font: inherit;
+  min-height: 44px;
 }
-
-/* スピンボタン（上下矢印）を非表示にする */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface);
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 7px;
 }
 input[type="number"] {
-  -moz-appearance: textfield; /* Firefox対応 */
+  max-width: 12rem;
 }
-
-/* フォーカス時の縁取りをやや明るく */
-input[type="number"]:focus {
-  outline: none;
-  border-color: #88c0ff;
-}
-
-/* --- ハンバーガーメニュー --- */
-.menu-btn {
-  font-size: 22px;
-  background: none;
-  border: none;
-  color: #fff;
+button,
+.tool-item a {
   cursor: pointer;
-
-  position: fixed;
-  top: 15px;
-  right: 20px;
-  z-index: 1001; /* メニューより前面に */
 }
-
+button.primary,
+.tool-item a {
+  border: 0;
+  border-radius: 7px;
+  padding: 0.6rem 1rem;
+  background: var(--accent);
+  color: var(--on);
+  font-weight: 650;
+  text-decoration: none;
+  text-align: center;
+}
+a {
+  color: var(--accent);
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.menu-btn {
+  background: none;
+  color: inherit;
+  border: 0;
+  font-size: 1.35rem;
+  width: 44px;
+}
 .menu-panel {
   position: fixed;
-  top: 60px; /* ヘッダーの高さに合わせる */
-  right: 0;
-  width: 220px;
-  height: calc(100% - 60px);
-  background-color: #121826;
-  border-left: 1px solid #333;
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  padding: 20px;
+  right: max(1rem, calc((100vw - 948px) / 2));
+  top: 56px;
+  z-index: 4;
+  max-height: 80vh;
+  overflow: auto;
 }
-
-.menu-panel.open {
-  transform: translateX(0);
-}
-
 .menu-panel ul {
   list-style: none;
+  margin: 0;
   padding: 0;
 }
-
-.menu-panel li {
-  margin-bottom: 15px;
-}
-
 .menu-panel a {
-  color: #fff;
-  text-decoration: none;
+  display: block;
+  padding: 0.65rem;
 }
-
-.menu-panel a:hover {
-  color: #66ccff;
+pre {
+  font-variant-numeric: tabular-nums;
+  background: var(--tint);
+  padding: 0.65rem;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-radius: 6px;
 }
-
-/* ===== 追加: text/datetime-local を既存 input[type="url"] と同じ見た目に揃える ===== */
-input[type="text"],
-input[type="datetime-local"] {
-  width: 100%;
-  box-sizing: border-box;
-  background: #0f1430;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-  outline: none;
-  font: inherit;
+#worldCoord,
+#chunkCoord,
+#tileCoord {
+  white-space: pre;
+  overflow-x: auto;
 }
-input[type="text"]:focus,
-input[type="datetime-local"]:focus {
-  border-color: var(--accent);
+.details {
+  margin-top: 0.75rem;
+}
+.details summary {
+  cursor: pointer;
+}
+.note,
+.muted {
+  color: var(--muted);
+}
+.preview {
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0/16px 16px;
+}
+.actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  align-items: center;
 }

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+
+    <title>wplace 道路作図</title>
+    <link rel="canonical" href="https://rc-tools.wplaceoki.com/roadDesign" />
+    <link rel="preload" href="./style.css" as="style" />
+    <link rel="stylesheet" href="./style.css" />
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "d6bd2c0d2fca4165b0b5faa0d853c779"}'
+    ></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-FSQYW6S77K"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-FSQYW6S77K");
+    </script>
+  </head>
+
+  <body>
+    <header class="app-header">
+      <div class="header-inner">
+        <h1>道路作図</h1>
+        <button
+          id="menuBtn"
+          class="menu-btn"
+          aria-label="メニュー"
+          aria-controls="menuPanel"
+          aria-expanded="false"
+        >
+          ☰
+        </button>
+      </div>
+    </header>
+
+    <nav id="menuPanel" class="menu-panel" hidden>
+      <ul>
+        <li><a href="./">ホーム</a></li>
+        <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
+        <li><a href="./urlCoordinates">URL座標変換ツール</a></li>
+        <li><a href="./planPolyline">折れ線プランナー</a></li>
+        <li><a href="./paintCalc">ペイント量計算ツール</a></li>
+        <li><a href="./finishPaint">完成予定日計算</a></li>
+        <li><a href="./roadDesign">道路作図</a></li>
+        <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
+      </ul>
+    </nav>
+
+    <main class="app-main">
+      <div class="container">
+        <div class="design-grid">
+          <form id="road" class="card">
+            <div class="field">
+              <label for="kind">図形</label
+              ><select id="kind" name="kind">
+                <option value="circle">円</option>
+                <option value="arc">円弧</option>
+                <option value="clothoid">クロソイド</option>
+              </select>
+            </div>
+            <fieldset id="centerFields">
+              <div class="field">
+                <label for="center">中心地点URL</label
+                ><input id="center" name="center" type="url" required />
+              </div>
+            </fieldset>
+            <fieldset id="spiralFields">
+              <div class="field">
+                <label for="start">進入地点URL</label
+                ><input id="start" name="start" type="url" required />
+              </div>
+              <div class="field">
+                <label for="intersection">交点URL</label
+                ><input
+                  id="intersection"
+                  name="intersection"
+                  type="url"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="end">退出地点URL</label
+                ><input id="end" name="end" type="url" required />
+              </div>
+              <div class="field">
+                <label for="length">緩和区間長(px)</label
+                ><input
+                  id="length"
+                  name="length"
+                  type="number"
+                  min="1"
+                  value="20"
+                  required
+                />
+              </div>
+            </fieldset>
+            <fieldset id="angles">
+              <div class="field">
+                <label for="startAngle">開始角(度)</label
+                ><input
+                  id="startAngle"
+                  name="startAngle"
+                  type="number"
+                  min="0"
+                  max="360"
+                  value="0"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="endAngle">終了角(度)</label
+                ><input
+                  id="endAngle"
+                  name="endAngle"
+                  type="number"
+                  min="0"
+                  max="360"
+                  value="90"
+                  required
+                />
+              </div>
+            </fieldset>
+            <div class="field">
+              <label for="radius">半径(px)</label
+              ><input
+                id="radius"
+                name="radius"
+                type="number"
+                min="1"
+                value="50"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="width">道路幅(px)</label
+              ><input
+                id="width"
+                name="width"
+                type="number"
+                min="1"
+                max="128"
+                value="5"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="edge">縁幅(px)</label
+              ><input
+                id="edge"
+                name="edge"
+                type="number"
+                min="0"
+                value="1"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="overlap">重ね幅</label
+              ><select id="overlap" name="overlap">
+                <option>0</option>
+                <option selected>1</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="color">路面色</label
+              ><select id="color" name="color"></select>
+            </div>
+            <div class="field">
+              <label for="edgeColor">縁色</label
+              ><select id="edgeColor" name="edgeColor"></select>
+            </div>
+            <button class="primary">作図する</button>
+          </form>
+          <div>
+            <section id="output" class="card" hidden>
+              <h2>プレビュー</h2>
+              <img id="preview" class="preview" alt="テンプレート" />
+              <div class="actions">
+                <a id="download" download="template.wplace"
+                  >.wplace をダウンロード</a
+                ><button id="share" class="primary" type="button">
+                  共有リンクを発行</button
+                ><a id="shared"></a>
+              </div>
+            </section>
+            <p id="message" role="status"></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <p class="muted">© wplace沖ノ鳥島開発 道路公社技術部</p>
+      </div>
+    </footer>
+
+    <script type="module" src="./roadDesign.js"></script>
+  </body>
+</html>

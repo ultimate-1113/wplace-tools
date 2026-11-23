@@ -26,12 +26,12 @@
   <header class="app-header">
     <div class="header-inner">
       <h1>ペイント計算ツール</h1>
-      <button id="menuBtn" class="menu-btn">☰</button>
+      <button id="menuBtn" class="menu-btn" aria-label="メニュー" aria-controls="menuPanel" aria-expanded="false">☰</button>
     </div>
   </header>
 
   <!-- ===== メニュー ===== -->
-  <nav id="menuPanel" class="menu-panel">
+  <nav id="menuPanel" class="menu-panel" hidden>
     <ul>
       <li><a href="./">ホーム</a></li>
       <li><a href="./ConvertUrl">地図URL変換ツール</a></li>
@@ -39,6 +39,8 @@
       <li><a href="./planPolyline">折れ線プランナー</a></li>
       <li><a href="./paintCalc">ペイント量計算ツール</a></li>
       <li><a href="./finishPaint">完成予定日計算</a></li>
+      <li><a href="./roadDesign">道路作図</a></li>
+      <li><a href="./junctionTemplates">ジャンクションテンプレート</a></li>
     </ul>
   </nav>
 
@@ -126,79 +128,6 @@
 
 
   <!-- ===== util.js 読み込み ===== -->
-  <script src="./utils.js" defer></script>
-  <script>
-    /* -----------------------------------------------------
-     * メイン処理
-     * ----------------------------------------------------- */
-    const form = document.getElementById("paint-form");
-    const resultSec = document.getElementById("result");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const url1 = document.getElementById("startUrlInput").value.trim();
-      const url2 = document.getElementById("endUrlInput").value.trim();
-      const roadWidth = parseInt(document.getElementById("roadWidth").value, 10);
-      const overlapWidth = parseInt(document.getElementById("overlapWidth").value, 10);
-
-      try {
-        const { lat: lat1, lng: lng1 } = parseWplaceURL(url1);
-        const { lat: lat2, lng: lng2 } = parseWplaceURL(url2);
-        const p1 = llzToWorldPixel(lat1, lng1);
-        const p2 = llzToWorldPixel(lat2, lng2);
-
-        const rawDx = Math.abs(p2.worldX - p1.worldX);
-        let dx = rawDx;
-
-        // 日付変更線(±180°)を跨いでいる可能性が高いときだけ選択させる
-        if (rawDx > SCALE / 2) {
-          const wrapDx = SCALE - rawDx;
-          const useWrap = confirm(
-            "2地点が日付変更線(±180°)を跨いでいる可能性があります。\n" +
-            "OK: 日付変更線を跨ぐ（短い方）\n" +
-            "キャンセル: 跨がない（長い方）"
-          );
-          dx = useWrap ? wrapDx : rawDx;
-        }
-
-        dx = Math.round(dx);
-        const dy = Math.round(Math.abs(p2.worldY - p1.worldY));
-
-        const longAxis  = Math.max(dx, dy);
-        const shortAxis = Math.min(dx, dy);
-
-        // 必px = (長い − 1) * (道路幅) + 短い * 重ね幅
-        const requiredPx =
-          (longAxis - 1) * (roadWidth) +
-          shortAxis * overlapWidth;
-
-        // ===== 標準表示 =====
-        document.getElementById("deltaXY").textContent =
-          `dx = ${dx} px\ndy = ${dy} px`;
-
-        document.getElementById("requiredPx").textContent =
-          `${requiredPx} px`;
-
-        document.getElementById("mapBoth").textContent =
-          `地点1 map座標: ${summarizeMap(p1)}\n` +
-          `地点2 map座標: ${summarizeMap(p2)}`;
-
-        // ===== 詳細 =====
-        document.getElementById("debug").textContent =
-          summarizePointDetailed("地点1", p1) + "\n\n" +
-          summarizePointDetailed("地点2", p2) + "\n\n" +
-          `道路幅 = ${roadWidth}\n重ね幅 = ${overlapWidth}`;
-
-        resultSec.hidden = false;
-
-      } catch (err) {
-        alert("URL解析エラー: " + err.message);
-        console.error(err);
-      }
-    });
-
-  </script>
-
+  <script type="module" src="./paintCalc.js"></script>
 </body>
 </html>
